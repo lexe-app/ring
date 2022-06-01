@@ -142,6 +142,9 @@ impl<T> RandomlyConstructable for T where T: self::sealed::RandomlyConstructable
 /// On Windows, `fill` is implemented using the platform's API for secure
 /// random number generation.
 ///
+/// Inside Intel SGX enclaves, `fill()` is implemented using the built-in
+/// RDRAND hardware RNG instruction.
+///
 /// [`getrandom`]: http://man7.org/linux/man-pages/man2/getrandom.2.html
 #[derive(Clone, Debug)]
 pub struct SystemRandom(());
@@ -194,6 +197,9 @@ use self::darwin::fill as fill_impl;
 
 #[cfg(any(target_os = "fuchsia"))]
 use self::fuchsia::fill as fill_impl;
+
+#[cfg(all(target_arch = "x86_64", target_env = "sgx", target_feature = "rdrand"))]
+use self::rdrand::fill as fill_impl;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod sysrand_chunk {
@@ -429,5 +435,44 @@ mod fuchsia {
     #[link(name = "zircon")]
     extern "C" {
         fn zx_cprng_draw(buffer: *mut u8, length: usize);
+    }
+}
+
+#[cfg(all(target_arch = "x86_64", target_env = "sgx", target_feature = "rdrand"))]
+mod rdrand {
+    use crate::error;
+    use core::{arch::x86_64::_rdrand64_step, mem};
+
+    // Intel's documentation recommends retrying at least 10 times before we give
+    // up and assume there's an issue with the hardware RNG.
+    //
+    // For context, each RDRAND call has a ~1% probability of failure even under
+    // normal conditions. Failing 10 times in a row then has probability 0.01^100
+    // = 1e-20, which should be small enough for most purposes.
+    //
+    // See: [Intel Digital Random Number Generator > Section 5.2.1 > RDRAND Retry Recommandations](https://www.intel.com/content/dam/develop/external/us/en/documents/drng-software-implementation-guide-2-1-185467.pdf)
+    const RDRAND_MAX_RETRIES: usize = 10;
+
+    const RDRAND_STATUS_OK: i32 = 1;
+
+    fn gen_u64() -> Result<u64, error::Unspecified> {
+        for _ in 0..RDRAND_MAX_RETRIES {
+            let mut out: u64 = 0;
+            let rng_status = unsafe { _rdrand64_step(&mut out) };
+            if rng_status == RDRAND_STATUS_OK {
+                return Ok(out);
+            }
+        }
+        Err(error::Unspecified)
+    }
+
+    pub fn fill(dest: &mut [u8]) -> Result<(), error::Unspecified> {
+        for dest_chunk in dest.chunks_mut(mem::size_of::<u64>()) {
+            let rand = gen_u64()?;
+            let rand_bytes = rand.to_ne_bytes();
+            dest_chunk.copy_from_slice(&rand_bytes[..dest_chunk.len()]);
+        }
+
+        Ok(())
     }
 }
