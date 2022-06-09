@@ -45,11 +45,22 @@ pub(crate) struct Feature {
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub(super) unsafe fn init_global_shared_with_assembly() {
-    prefixed_extern! {
-        fn OPENSSL_cpuid_setup();
+    #[cfg(not(target_env = "sgx"))]
+    {
+        prefixed_extern! {
+            fn OPENSSL_cpuid_setup();
+        }
+        unsafe {
+            OPENSSL_cpuid_setup();
+        }
     }
-    unsafe {
-        OPENSSL_cpuid_setup();
+
+    #[cfg(target_env = "sgx")]
+    {
+        prefixed_extern! {
+            static mut OPENSSL_ia32cap_P: [u32; 4];
+        }
+        unsafe { OPENSSL_ia32cap_P = [0x5f8bfbff, 0xfffa3203, 0xf1bf2fbf, 0x40415f46] };
     }
 }
 
