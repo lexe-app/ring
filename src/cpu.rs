@@ -39,11 +39,24 @@ pub(crate) fn features() -> Features {
         let () = INIT.call_once(|| {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             {
-                extern "C" {
-                    fn GFp_cpuid_setup();
+                #[cfg(not(target_env = "sgx"))]
+                {
+                    extern "C" {
+                        fn GFp_cpuid_setup();
+                    }
+                    unsafe {
+                        GFp_cpuid_setup();
+                    }
                 }
-                unsafe {
-                    GFp_cpuid_setup();
+
+                // can't call cpuid instruction inside an enclave. hard code the
+                // available features on my VM for now.
+                #[cfg(target_env = "sgx")]
+                {
+                    extern "C" {
+                        static mut GFp_ia32cap_P: [u32; 4];
+                    }
+                    unsafe { GFp_ia32cap_P = [0x5f8bfbff, 0xfffa3203, 0xf1bf2fbf, 0x40415f46] };
                 }
             }
 
