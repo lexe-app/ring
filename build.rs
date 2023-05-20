@@ -260,7 +260,10 @@ fn ring_build_rs_main() {
         ("o", "-o")
     };
 
-    let is_git = std::fs::metadata(".git").is_ok();
+    // Force ring to always build from src, instead of using pregenerated files.
+    // Fixes a nix build error downstream.
+    let is_git = true;
+    // let is_git = std::fs::metadata(".git").is_ok();
 
     // Published builds are always release builds.
     let is_debug = is_git && env::var("DEBUG").unwrap() != "false";
