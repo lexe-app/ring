@@ -551,6 +551,7 @@ fn cc(
         && target.os != "redox"
         && target.os != "windows"
         && target.arch != "wasm32"
+        && target.env != "sgx"
     {
         let _ = c.flag("-fstack-protector");
     }
