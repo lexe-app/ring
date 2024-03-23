@@ -126,6 +126,7 @@ impl crate::sealed::Sealed for SystemRandom {}
 // implementation.
 #[cfg(any(
     all(feature = "less-safe-getrandom-custom-or-rdrand", target_os = "none"),
+    target_env = "sgx",
     target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
