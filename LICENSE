@@ -1,3 +1,30 @@
+ Lexe License Notice
+ -------------------
+
+This fork is dual-licensed under the PolyForm Noncommercial License 1.0.0 and
+the original license terms.
+
+The original project and all contributions not explicitly marked otherwise are
+licensed under the original terms set forth below.
+
+All code contributed by developers employed by or contracted to Lexe Corporation
+is licensed under the PolyForm Noncommercial License 1.0.0. The full text of
+this license can be found in the file `LICENSE-POLYFORM.md`.
+
+All commits licensed under the PolyForm Noncommercial License 1.0.0 will be
+indicated as such in the commit details. Commits without explicit licensing
+information fall under the original license terms below.
+
+- If you are using any part of the code contributed by Lexe Corporation, you
+  must comply with the terms of the PolyForm Noncommercial License 1.0.0.
+- If you are using only non-Lexe portions of this fork, you may do so under the
+  terms of the original license terms.
+
+© 2025 Lexe Corporation
+
+ Original License Notice
+ -----------------------
+
 *ring* uses an "ISC" license, like BoringSSL used to use, for new code
 files. See LICENSE-other-bits for the text of that license.
 
