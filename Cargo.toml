@@ -154,6 +154,13 @@ include = [
 [package.metadata.docs.rs]
 all-features = true
 
+[package.metadata.fortanix-sgx]
+debug = true
+heap-size = 0x0700_0000 # 128 MiB
+ssaframesize = 1
+stack-size = 0x40_0000 # 4 MiB
+threads = 4
+
 [lib]
 name = "ring"
 

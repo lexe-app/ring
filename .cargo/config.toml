@@ -1,0 +1,4 @@
+[target.x86_64-fortanix-unknown-sgx]
+runner = "run-sgx-cargo"
+# rustflags = ["-Ctarget-feature=+aes,+ssse3", "-Zoom=panic"]
+rustflags = ["-Ctarget-cpu=x86-64-v3"]
