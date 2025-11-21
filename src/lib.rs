@@ -58,6 +58,7 @@
     clippy::neg_cmp_op_on_partial_ord,
     clippy::too_many_arguments,
     clippy::type_complexity,
+    mismatched_lifetime_syntaxes,
     non_camel_case_types,
     non_snake_case,
     unsafe_code
