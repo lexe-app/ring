@@ -138,6 +138,7 @@ impl crate::sealed::Sealed for SystemRandom {}
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_env = "sgx",
     target_os = "solaris",
     target_os = "vita",
     target_os = "windows",
