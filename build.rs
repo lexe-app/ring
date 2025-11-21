@@ -620,7 +620,7 @@ fn nasm(file: &Path, arch: &str, include_dir: &Path, out_dir: &Path, c_root_dir:
     let mut include_dir = include_dir.as_os_str().to_os_string();
     include_dir.push(OsString::from(String::from(std::path::MAIN_SEPARATOR)));
 
-    let mut c = Command::new("./target/tools/windows/nasm/nasm");
+    let mut c = Command::new("nasm");
     let _ = c
         .arg("-o")
         .arg(out_file.to_str().expect("Invalid path"))
