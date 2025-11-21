@@ -46,16 +46,25 @@ pub(super) mod featureflags {
     pub(in super::super) fn get_or_init() -> cpu::Features {
         // SAFETY: `OPENSSL_cpuid_setup` must be called only in
         // `INIT.call_once()` below.
+        #[cfg(not(target_env = "sgx"))]
         prefixed_extern! {
             fn OPENSSL_cpuid_setup(out: &mut [u32; 4]);
         }
 
         let _: NonZeroUsize = FEATURES.get_or_init(|| {
-            let mut cpuid = [0; 4];
-            // SAFETY: We assume that it is safe to execute CPUID and XGETBV.
-            unsafe {
-                OPENSSL_cpuid_setup(&mut cpuid);
-            }
+            #[cfg(not(target_env = "sgx"))]
+            let cpuid = {
+                let mut cpuid = [0; 4];
+                // SAFETY: We assume that it is safe to execute CPUID and XGETBV.
+                unsafe {
+                    OPENSSL_cpuid_setup(&mut cpuid);
+                }
+                cpuid
+            };
+
+            #[cfg(target_env = "sgx")]
+            let cpuid = [0x5f8bfbff, 0xfffa3203, 0xf1bf6fbf, 0x40415f46];
+
             let detected = super::cpuid_to_caps_and_set_c_flags(&cpuid);
             let merged = CAPS_STATIC | detected;
 
@@ -378,5 +387,30 @@ mod tests {
         use super::*;
         use crate::cpu::{self, GetFeature as _};
         assert!(matches!(cpu::features().get_feature(), Some(Sse2 { .. })))
+    }
+
+    #[cfg(all(target_arch = "x86_64", feature = "std"))]
+    #[ignore]
+    #[test]
+    fn dump_cpuid() {
+        extern crate std;
+
+        prefixed_extern! {
+            fn OPENSSL_cpuid_setup(out: &mut [u32; 4]);
+        }
+
+        let features = super::featureflags::get_or_init();
+        std::println!("0b{:032b}", features.values().values());
+
+        let mut cpuid = [0; 4];
+        unsafe {
+            OPENSSL_cpuid_setup(&mut cpuid);
+        }
+
+        std::print!("[");
+        std::print!("0x{:08x}, ", cpuid[0]);
+        std::print!("0x{:08x}, ", cpuid[1]);
+        std::print!("0x{:08x}, ", cpuid[2]);
+        std::print!("0x{:08x}]\n", cpuid[3]);
     }
 }
