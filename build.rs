@@ -254,6 +254,7 @@ const LINUX_ABI: &[&str] = &[
     "linux",
     "redox",
     "solaris",
+    "unknown",
 ];
 
 const WIN32N: &str = "win32n";
