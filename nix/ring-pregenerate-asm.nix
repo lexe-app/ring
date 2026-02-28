@@ -30,7 +30,7 @@ rustPlatform.buildRustPackage {
     ];
   };
 
-  cargoHash = "sha256-Ea7YN6eRMhvp9EyBq8Mms18ssgwKvpOD7rnoWfd9fX4=";
+  cargoHash = "sha256-x01r9j9zji/Zp+kFqgkzM+nc/gMPmDKKTZ0UyymogUU=";
 
   RING_PREGENERATE_ASM = true;
 
