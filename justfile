@@ -18,6 +18,7 @@ test *args:
 dump-cpuid:
     cargo test -p ring --lib --features=std -- dump_cpuid --ignored --nocapture
 
+# build the generated assembly/object files in pregenerated/
 ring-pregenerate-asm:
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -32,3 +33,14 @@ ring-pregenerate-asm:
 
     rm -rf pregenerated
     mv "$tmpdir/pregenerated" pregenerated
+
+# copy and modified/untracked files in pregenerated/ out for inspection
+cp-pregen-diff:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    system="$(nix eval --impure --expr 'builtins.currentSystem' | jq -r .)"
+    out="notes/pregen/$system"
+    mkdir -p "$out"
+
+    git ls-files -z --modified --others pregenerated/ | xargs -0 cp -t "$out"

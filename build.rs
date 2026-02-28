@@ -633,7 +633,16 @@ fn nasm(file: &Path, arch: &str, include_dir: &Path, out_dir: &Path, c_root_dir:
         .arg("-i")
         .arg(include_dir)
         .arg("-Xgnu")
-        .arg("-gcv8")
+        // Omit `-gcv8`: CodeView debug info embeds absolute paths to the
+        // source .asm and output .o files. nasm resolves these internally,
+        // so even passing relative paths doesn't help. Since the nix sandbox
+        // root differs between Linux (/build/) and macOS (/private/tmp/),
+        // this makes the pregenerated objects non-reproducible. The debug
+        // info is not needed for shipped pregenerated objects.
+        //
+        // `--reproducible` zeroes the COFF header timestamp, which also
+        // differs between builds.
+        .arg("--reproducible")
         .arg(c_root_dir.join(file));
     run_command(c);
 }
