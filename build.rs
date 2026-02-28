@@ -311,7 +311,9 @@ fn ring_build_rs_main(c_root_dir: &Path, core_name_and_version: &str) {
     let endian = env::var("CARGO_CFG_TARGET_ENDIAN").unwrap();
     let is_little_endian = endian == "little";
 
-    let is_git = fs::metadata(c_root_dir.join(".git")).is_ok();
+    // NOTE(phlip9): set to false to always use pre-generated asm
+    // let is_git = fs::metadata(c_root_dir.join(".git")).is_ok();
+    let is_git = false;
 
     // Published builds are always built in release mode.
     let is_debug = is_git && env::var("DEBUG").unwrap() != "false";
